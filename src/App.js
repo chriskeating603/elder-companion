@@ -104,15 +104,19 @@ function App() {
       </header>
       <div className="element-wrapper">
         <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
-          {isRecording ? 'Stop Recording and Get Response From FDR' : 'Record'}
+          {isRecording ? 'Stop Recording and Get Response From FDR' : 'Ask FDR a Question'}
         </button>
       </div>
+      {transcript && (
       <div className="transcript">
         <p>Me: {transcript}</p>
       </div>
+      )}
+      {fdrResponse && (
       <div className="response">
         <p>{fdrResponse}</p>
       </div>
+      )}
       {isSpeaking && (
         <button className="record-btn" onClick={stopReadingAloud}>
             Stop Speech
