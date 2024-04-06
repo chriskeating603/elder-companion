@@ -11,7 +11,7 @@ const app = express();
 app.use(cors()); // Enable CORS for all routes
 const upload = multer({ dest: 'uploads/' });
 
-console.log(process.env.OPENAI_API_KEY); // This should print your API key
+
 
 let conversationHistory = [];
 
@@ -123,3 +123,4 @@ app.post('/transcribe-text', express.json(), async (req, res) => {
     res.status(500).send('Error in conversation');
   }
 });
+

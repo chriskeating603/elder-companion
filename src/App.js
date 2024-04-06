@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import Axios
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import './App.css';
 import rooseveltImage from './assets/images/fdr.png';
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [fdrResponse, setFdrResponse] = useState(''); // State to store FDR's response
+  const [fdrResponse, setFdrResponse] = useState('');
+  const speechSynthesisUtterance = useRef(null); // Ref to hold the speech synthesis utterance
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -14,6 +15,37 @@ function App() {
       return;
     }
   }, []);
+
+  useEffect(() => {
+    if (fdrResponse) {
+      readFdrResponseAloud(fdrResponse);
+    }
+  }, [fdrResponse]);
+
+  const readFdrResponseAloud = (text) => {
+    const synth = window.speechSynthesis;
+    let voices = synth.getVoices();
+
+    // Find the 'Alex' voice in the list of voices
+    const alexVoice = voices.find(voice => voice.name === 'Aaron');
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (alexVoice) {
+      utterance.voice = alexVoice;
+    } else {
+      console.log("Aaron voice not found, using default voice.");
+    }
+
+    // Optionally, adjust the pitch and rate to try and deepen the voice
+    utterance.pitch = 0.9; // Lower the pitch a bit
+    utterance.rate = 0.9; // Slightly slower
+
+    synth.speak(utterance);
+  };
+
+  const stopReadingAloud = () => {
+    window.speechSynthesis.cancel();
+  };
 
   const startRecording = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -31,7 +63,7 @@ function App() {
       const last = event.results.length - 1;
       const text = event.results[last][0].transcript;
       setTranscript(text);
-      sendTranscriptToServer(text); // Call the function with the text directly
+      sendTranscriptToServer(text);
     };
 
     recognition.onend = () => {
@@ -45,37 +77,33 @@ function App() {
     recognition.start();
   };
 
-  // Function to send the transcript to the server and receive a response
   const sendTranscriptToServer = async (transcriptText) => {
     try {
       const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: transcriptText });
-      setFdrResponse(response.data.response); // Assuming the server sends back an object with a 'response' field
-      
+      setFdrResponse(response.data.response);
     } catch (error) {
       console.error('Error sending transcript to server:', error);
     }
   };
-
-  useEffect(() => {
-    if (transcript) {
-      sendTranscriptToServer(transcript);
-    }
-  }, [transcript]); // This effect runs when the transcript state updates
 
   return (
     <div className="App">
       <h1 className="app-title">Have a Conversation with FDR</h1>
       <div className="element-wrapper">
         <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
-          {isRecording ? 'Recording...' : 'Record'}
+          {isRecording ? 'Stop Recording and Get Response From FDR' : 'Record'}
         </button>
       </div>
       <div className="transcript">
-        <p>Transcript: {transcript}</p>
+        <p>Me: {transcript}</p>
       </div>
       <div className="response">
-        <p>Response: {fdrResponse}</p>
+        <p>{fdrResponse}</p>
       </div>
+      {/* Add a button to stop the speech synthesis */}
+      <button className="record-btn" onClick={stopReadingAloud}>
+          Stop Speech
+        </button>
       <div className="element-wrapper">
         <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
         <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>

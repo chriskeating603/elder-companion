@@ -50,6 +50,24 @@
   margin-bottom: 20px; /* Adds some space below the title */
 }
 
+.record-btn {
+  padding: 10px 20px; /* Adjust the padding as needed */
+  /* Additional styling for the button can be added here */
+  cursor: pointer; /* Changes the cursor to a pointer when hovering over the button */
+  background-color: #007bff; /* Example background color */
+  color: white; /* Text color */
+  border: none; /* Removes the border */
+  border-radius: 5px; /* Rounds the corners of the button */
+  margin: 5px; /* Adds some space around the button */
+  font-size: 16px; /* Adjust the font size as needed */
+  transition: background-color 0.3s; /* Smooth transition for background color change */
+  padding-bottom: 10px;
+}
+
+.record-btn:hover {
+  background-color: #0056b3; /* Darker shade when hovered for visual feedback */
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
