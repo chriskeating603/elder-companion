@@ -128,3 +128,19 @@
 .speaking {
   animation: speakingPulse 1s infinite;
 }
+
+.header-btn {
+  margin-left: auto; /* Aligns the button to the right of the header */
+  padding: 8px 16px;
+  font-size: 16px;
+  color: black; /* Set text color to black */
+  background-color: #d3d3d3; /* Slightly darker gray than the header */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Smooth transition for background color change */
+}
+
+.header-btn:hover {
+  background-color: #a9a9a9; /* Darker gray on hover */
+}

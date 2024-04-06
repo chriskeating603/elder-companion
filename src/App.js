@@ -106,12 +106,28 @@ function App() {
     }
   };
 
+  const clearConversation = async () => {
+    try {
+      // Send a request to the server to clear the conversation history
+      await axios.post('http://localhost:3001/clear-conversation');
+      // Reset the local conversation history state
+      setConversationHistory([]);
+    } catch (error) {
+      console.error('Error clearing conversation:', error);
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logoImage} alt="Logo" className="app-logo"/>
         <div className="title-container">
           <h1 className="app-title">Have a Conversation with FDR</h1>
+        </div>
+        <div className="">
+          <button className="header-btn" onClick={clearConversation}>
+            Start New Conversation
+          </button>
         </div>
       </header>
       <div className="element-wrapper">

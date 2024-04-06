@@ -59,7 +59,13 @@ async function converseWithFDR(transcribedText) {
   });
   console.log(response);
   // Append the model's response to the conversation history
-  const modelResponse = response.choices[0].text.trim();
+  let modelResponse = response.choices[0].text.trim();
+
+  // Check if the response already starts with "FDR:" to avoid repetition
+  if (!modelResponse.startsWith("FDR:")) {
+    modelResponse = "FDR: " + modelResponse;
+  }
+
   conversationHistory.push({ role: "assistant", content: modelResponse });
 
   return modelResponse;
@@ -124,3 +130,9 @@ app.post('/transcribe-text', express.json(), async (req, res) => {
   }
 });
 
+app.post('/clear-conversation', (req, res) => {
+  // Reset the conversation history
+  conversationHistory = [];
+  // Respond to the request indicating success
+  res.send({ message: 'Conversation history cleared.' });
+});
