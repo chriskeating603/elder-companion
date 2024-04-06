@@ -56,7 +56,6 @@ async function converseWithFDR(transcribedText) {
     top_p: 1.0,
     frequency_penalty: 0.0,
     presence_penalty: 0.6,
-    // Removed the stop parameter
   });
   console.log(response);
   // Append the model's response to the conversation history
@@ -68,30 +67,38 @@ async function converseWithFDR(transcribedText) {
 
 // Helper function to generate the prompt from the conversation history
 function generatePrompt(history) {
-  return history.map(entry => `${entry.role}: ${entry.content}`).join('\n');
+  // Set up the initial context for the conversation if the history is empty
+  let prompt = "You are Franklin D. Roosevelt (FDR), the 32nd President of the United States. Respond as if you are FDR.";
+  
+  // Append each entry in the conversation history to the prompt
+  history.forEach(entry => {
+    prompt += `\n${entry.role === 'user' ? 'Question:' : 'FDR:'} ${entry.content}`;
+  });
+
+  return prompt;
 }
 
-app.post('/transcribe', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded.');
-  }
+// app.post('/transcribe', upload.single('file'), async (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).send('No file uploaded.');
+//   }
 
-  try {
-    const teamName = "exampleTeam";
-    const transcriptionText = await transcribe(req.file.path, teamName);
+//   try {
+//     const teamName = "exampleTeam";
+//     const transcriptionText = await transcribe(req.file.path, teamName);
 
-    // Clean up the uploaded file
-    fs.unlinkSync(req.file.path);
+//     // Clean up the uploaded file
+//     fs.unlinkSync(req.file.path);
 
-    // Send the transcribed text to OpenAI's conversational API
-    const modelResponse = await converseWithFDR(transcriptionText);
+//     // Send the transcribed text to OpenAI's conversational API
+//     const modelResponse = await converseWithFDR(transcriptionText);
 
-    res.json({ transcription: transcriptionText, response: modelResponse });
-  } catch (error) {
-    console.error('Error with OpenAI transcription or conversation:', error);
-    res.status(500).send('Error in transcription or conversation');
-  }
-});
+//     res.json({ transcription: transcriptionText, response: modelResponse });
+//   } catch (error) {
+//     console.error('Error with OpenAI transcription or conversation:', error);
+//     res.status(500).send('Error in transcription or conversation');
+//   }
+// });
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {

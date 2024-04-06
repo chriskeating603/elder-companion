@@ -50,6 +50,7 @@ function App() {
     try {
       const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: transcriptText });
       setFdrResponse(response.data.response); // Assuming the server sends back an object with a 'response' field
+      
     } catch (error) {
       console.error('Error sending transcript to server:', error);
     }
