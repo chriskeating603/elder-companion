@@ -1,62 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import rooseveltImage from './assets/images/fdr.png'; // Update the path accordingly
+import rooseveltImage from './assets/images/fdr.png';
 
 function App() {
-  const [recorder, setRecorder] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
 
-  // Function to start recording
-  const startRecording = async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        setRecorder(mediaRecorder);
-
-        mediaRecorder.start();
-        setIsRecording(true);
-
-        mediaRecorder.onstop = () => {
-          // Handle what happens when recording stops
-          console.log("Recording stopped");
-        };
-
-        mediaRecorder.ondataavailable = async (e) => {
-          const audioBlob = e.data;
-          const audioFile = new File([audioBlob], "recording.webm", { type: "audio/webm" });
-          const formData = new FormData();
-          formData.append('file', audioFile);
-
-          // Replace 'http://localhost:5000' with your server's URL
-          fetch('http://localhost:5000/transcribe', {
-            method: 'POST',
-            body: formData,
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Success:', data);
-            setTranscript(data.transcription); // Assuming you have a state to hold the transcription
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-        };
-      } catch (err) {
-        console.error("Error accessing the microphone:", err);
-      }
-    } else {
-      console.error("getUserMedia not supported on your browser!");
+  useEffect(() => {
+    // Check for browser compatibility
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Your browser does not support speech recognition. Please try Chrome.');
+      return;
     }
+  }, []);
+
+  const startRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      console.log('Recording started');
+    };
+
+    recognition.onresult = (event) => {
+      const last = event.results.length - 1;
+      const text = event.results[last][0].transcript;
+      setTranscript(text);
+      console.log('Transcript:', text);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      console.log('Recording stopped');
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+    };
+
+    recognition.start();
   };
 
-  // Function to stop recording
   const stopRecording = () => {
-    if (recorder) {
-      recorder.stop();
-      setIsRecording(false);
-    }
+    // SpeechRecognition does not need to be stopped manually in this setup,
+    // it stops automatically when it's done. However, you can implement any
+    // cleanup or state updates you need here.
+    setIsRecording(false);
+    console.log('Stop recording manually if needed');
   };
 
   return (
@@ -74,7 +69,9 @@ function App() {
         <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
         <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
       </div>
-      <div>{transcript}</div>
+      <div className="transcript">
+        <p>Transcript: {transcript}</p>
+      </div>
     </div>
   );
 }
