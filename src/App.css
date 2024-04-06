@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 20px;
 }
 
 .App-logo {
@@ -26,6 +27,27 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.element-wrapper {
+  margin-bottom: 20px;
+}
+
+.roosevelt-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.image-caption {
+  color: #666;
+  font-style: italic;
+}
+
+.app-title {
+  font-weight: bold; /* Makes the title bold */
+  text-align: center; /* Centers the title */
+  font-size: 24px; /* Adjust the size as needed */
+  margin-bottom: 20px; /* Adds some space below the title */
 }
 
 @keyframes App-logo-spin {

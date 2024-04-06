@@ -1,23 +1,22 @@
 import logo from './logo.svg';
 import './App.css';
+// Import the image if it's stored locally in your src folder
+import rooseveltImage from './assets/images/fdr.png'; // Update the path accordingly
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1 className="app-title">Have a Conversation with FDR</h1>
+      <div className="element-wrapper">
+        <button className="record-btn">Record</button>
+      </div>
+      <div className="element-wrapper">
+        <button className="play-response-btn">Play Response</button>
+      </div>
+      <div className="element-wrapper">
+        <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
+        <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
+      </div>
     </div>
   );
 }
