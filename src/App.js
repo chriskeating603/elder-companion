@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Import Axios
 import './App.css';
 import rooseveltImage from './assets/images/fdr.png';
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [fdrResponse, setFdrResponse] = useState(''); // State to store FDR's response
 
   useEffect(() => {
-    // Check for browser compatibility
     if (!('webkitSpeechRecognition' in window)) {
       alert('Your browser does not support speech recognition. Please try Chrome.');
       return;
@@ -24,19 +25,17 @@ function App() {
 
     recognition.onstart = () => {
       setIsRecording(true);
-      console.log('Recording started');
     };
 
     recognition.onresult = (event) => {
       const last = event.results.length - 1;
       const text = event.results[last][0].transcript;
       setTranscript(text);
-      console.log('Transcript:', text);
+      sendTranscriptToServer(text); // Call the function with the text directly
     };
 
     recognition.onend = () => {
       setIsRecording(false);
-      console.log('Recording stopped');
     };
 
     recognition.onerror = (event) => {
@@ -46,31 +45,39 @@ function App() {
     recognition.start();
   };
 
-  const stopRecording = () => {
-    // SpeechRecognition does not need to be stopped manually in this setup,
-    // it stops automatically when it's done. However, you can implement any
-    // cleanup or state updates you need here.
-    setIsRecording(false);
-    console.log('Stop recording manually if needed');
+  // Function to send the transcript to the server and receive a response
+  const sendTranscriptToServer = async (transcriptText) => {
+    try {
+      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: transcriptText });
+      setFdrResponse(response.data.response); // Assuming the server sends back an object with a 'response' field
+    } catch (error) {
+      console.error('Error sending transcript to server:', error);
+    }
   };
+
+  useEffect(() => {
+    if (transcript) {
+      sendTranscriptToServer(transcript);
+    }
+  }, [transcript]); // This effect runs when the transcript state updates
 
   return (
     <div className="App">
       <h1 className="app-title">Have a Conversation with FDR</h1>
       <div className="element-wrapper">
-        <button className="record-btn" onClick={isRecording ? stopRecording : startRecording}>
-          {isRecording ? 'Stop Recording' : 'Record'}
+        <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
+          {isRecording ? 'Recording...' : 'Record'}
         </button>
       </div>
-      <div className="element-wrapper">
-        <button className="play-response-btn">Play Response</button>
+      <div className="transcript">
+        <p>Transcript: {transcript}</p>
+      </div>
+      <div className="response">
+        <p>Response: {fdrResponse}</p>
       </div>
       <div className="element-wrapper">
         <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
         <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
-      </div>
-      <div className="transcript">
-        <p>Transcript: {transcript}</p>
       </div>
     </div>
   );
