@@ -6,10 +6,10 @@ import logoImage from './assets/images/logo.png'; // Add this line
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [fdrResponse, setFdrResponse] = useState('');
-  const [isSpeaking, setIsSpeaking] = useState(false); // Track if speech is active
-  const speechSynthesisUtterance = useRef(null); // Ref to hold the speech synthesis utterance
+  const [conversationHistory, setConversationHistory] = useState([]); // Updated state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [conversationStarted, setConversationStarted] = useState(false);
+  const speechSynthesisUtterance = useRef(null);
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -19,10 +19,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (fdrResponse) {
-      readFdrResponseAloud(fdrResponse);
+    if (conversationHistory.length > 0) {
+      const lastResponse = conversationHistory[conversationHistory.length - 1].content;
+      readFdrResponseAloud(lastResponse);
     }
-  }, [fdrResponse]);
+  }, [conversationHistory]);
 
   const readFdrResponseAloud = (text) => {
     const synth = window.speechSynthesis;
@@ -65,12 +66,12 @@ function App() {
 
     recognition.onstart = () => {
       setIsRecording(true);
+      setConversationStarted(true); // Set conversation as started
     };
 
     recognition.onresult = (event) => {
       const last = event.results.length - 1;
       const text = event.results[last][0].transcript;
-      setTranscript(text);
       sendTranscriptToServer(text);
     };
 
@@ -86,9 +87,20 @@ function App() {
   };
 
   const sendTranscriptToServer = async (transcriptText) => {
+    // Basic capitalization and punctuation correction
+    const correctedText = transcriptText
+      .trim()
+      .replace(/^\w/, c => c.toUpperCase()) // Capitalize the first letter
+      .replace(/([^.])$/, "$1."); // Ensure it ends with a period
+
     try {
-      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: transcriptText });
-      setFdrResponse(response.data.response);
+      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: correctedText });
+      // Update conversation history with both user's question and FDR's response
+      setConversationHistory(prevHistory => [
+        ...prevHistory,
+        { role: 'user', content: correctedText },
+        { role: 'fdr', content: response.data.response }
+      ]);
     } catch (error) {
       console.error('Error sending transcript to server:', error);
     }
@@ -107,23 +119,20 @@ function App() {
           {isRecording ? 'Stop Recording and Get Response From FDR' : 'Ask FDR a Question'}
         </button>
       </div>
-      {transcript && (
-      <div className="transcript">
-        <p>Me: {transcript}</p>
+      <div className="conversation-history">
+        {conversationHistory.map((entry, index) => (
+          <div key={index} className={`conversation-entry ${entry.role}`}>
+            <p>{entry.role === 'user' ? 'Me: ' : ''}{entry.content}</p>
+          </div>
+        ))}
       </div>
-      )}
-      {fdrResponse && (
-      <div className="response">
-        <p>{fdrResponse}</p>
-      </div>
-      )}
       {isSpeaking && (
         <button className="record-btn" onClick={stopReadingAloud}>
-            Stop Speech
-          </button>
+          Stop Speech
+        </button>
       )}
       <div className="element-wrapper">
-        <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
+        <img src={rooseveltImage} alt="Franklin D. Roosevelt" className={`roosevelt-image ${isSpeaking ? 'speaking' : ''}`}/>
         <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
       </div>
     </div>

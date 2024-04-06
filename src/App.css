@@ -109,3 +109,22 @@
     padding-left: 60px; /* Add padding to prevent text from overlapping the logo */
   }
 }
+
+@keyframes speakingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 128, 0.7);
+  }
+  25% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 128, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(0, 0, 128, 0.3);
+  }
+  75% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 128, 0.5);
+  }
+}
+
+.speaking {
+  animation: speakingPulse 1s infinite;
+}
