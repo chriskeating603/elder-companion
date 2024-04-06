@@ -4,13 +4,13 @@
 }
 
 .app-logo {
-  height: 8vh; /* Adjust the logo height to fit within the header */
+  height: 6vh; /* Adjust the logo height to fit within the header */
   position: absolute; /* Position it absolutely within the header */
-  left: 20px; /* Distance from the left edge of the header */
+  left: 10px; /* Distance from the left edge of the header */
   top: 50%; /* Start at the vertical center */
   transform: translateY(-50%); /* Shift it up by half its height to truly center it */
-  margin-right: 20px; /* Adds some space between the logo and the title */
-  margin-left: 20px; /* Adds some space from the left edge of the header */
+  margin-right: 10px; /* Adds some space between the logo and the title */
+  margin-left: 10px; /* Adds some space from the left edge of the header */
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -61,10 +61,11 @@
   color: white; /* Text color */
   border: none; /* Removes the border */
   border-radius: 5px; /* Rounds the corners of the button */
-  margin: 5px; /* Adds some space around the button */
+  margin: 20px; /* Adds some space around the button */
   font-size: 16px; /* Adjust the font size as needed */
   transition: background-color 0.3s; /* Smooth transition for background color change */
   padding-bottom: 10px;
+
 }
 
 .record-btn:hover {
@@ -84,4 +85,27 @@
   display: flex; /* Use flexbox for layout */
   justify-content: center; /* Horizontally center content */
   align-items: center; /* This is redundant here but included for clarity */
+}
+@media (max-width: 768px) {
+  .App-header {
+    padding: 5px 10px; /* Reduce padding on smaller screens */
+    height: auto; /* Let the header size adjust based on its content */
+  }
+
+  .app-logo {
+    height: 6vh; /* Reduce the logo size on smaller screens */
+    left: 10px; /* Reduce the space from the left edge of the header */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .app-title {
+    font-size: calc(8px + 2vmin); /* Reduce the font size on smaller screens */
+  }
+
+  .title-container {
+    justify-content: center; /* Ensure the title is centered horizontally */
+    width: 100%; /* Take the full width to allow proper centering */
+    padding-left: 60px; /* Add padding to prevent text from overlapping the logo */
+  }
 }

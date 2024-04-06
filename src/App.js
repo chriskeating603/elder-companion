@@ -8,6 +8,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [fdrResponse, setFdrResponse] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false); // Track if speech is active
   const speechSynthesisUtterance = useRef(null); // Ref to hold the speech synthesis utterance
 
   useEffect(() => {
@@ -37,15 +38,21 @@ function App() {
       console.log("Aaron voice not found, using default voice.");
     }
 
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
     // Optionally, adjust the pitch and rate to try and deepen the voice
-    utterance.pitch = 0.7; // Lower the pitch more
+    utterance.pitch = 0.9; // Lower the pitch more
     utterance.rate = 0.8; // Slow down the rate a bit
 
+    setIsSpeaking(true);
     synth.speak(utterance);
   };
 
   const stopReadingAloud = () => {
     window.speechSynthesis.cancel();
+    setIsSpeaking(false);
   };
 
   const startRecording = () => {
@@ -106,10 +113,11 @@ function App() {
       <div className="response">
         <p>{fdrResponse}</p>
       </div>
-      {/* Add a button to stop the speech synthesis */}
-      <button className="record-btn" onClick={stopReadingAloud}>
-          Stop Speech
-        </button>
+      {isSpeaking && (
+        <button className="record-btn" onClick={stopReadingAloud}>
+            Stop Speech
+          </button>
+      )}
       <div className="element-wrapper">
         <img src={rooseveltImage} alt="Franklin D. Roosevelt" className="roosevelt-image"/>
         <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
