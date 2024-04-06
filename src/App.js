@@ -37,8 +37,8 @@ function App() {
     }
 
     // Optionally, adjust the pitch and rate to try and deepen the voice
-    utterance.pitch = 0.9; // Lower the pitch a bit
-    utterance.rate = 0.9; // Slightly slower
+    utterance.pitch = 0.7; // Lower the pitch more
+    utterance.rate = 0.8; // Slow down the rate a bit
 
     synth.speak(utterance);
   };

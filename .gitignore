@@ -24,3 +24,4 @@ yarn-error.log*
 
 .env
 ride-buddy-398317-7139ebdd6d3c.json
+.vercel
