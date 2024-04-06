@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import rooseveltImage from './assets/images/fdr.png';
+import logoImage from './assets/images/logo.png'; // Add this line
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
@@ -88,7 +89,12 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className="app-title">Have a Conversation with FDR</h1>
+      <header className="App-header">
+        <img src={logoImage} alt="Logo" className="app-logo"/>
+        <div className="title-container">
+          <h1 className="app-title">Have a Conversation with FDR</h1>
+        </div>
+      </header>
       <div className="element-wrapper">
         <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
           {isRecording ? 'Stop Recording and Get Response From FDR' : 'Record'}
