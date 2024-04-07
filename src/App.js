@@ -34,15 +34,16 @@ function App() {
     event.preventDefault(); // Prevent the form from submitting in the traditional way
     const figureName = event.target.figureName.value; // Assuming your input has a name attribute of 'figureName'
     
+    // Update the historical figure name at the top of the screen immediately
+    const formattedName = formatName(figureName);
+    setHistoricalFigure(formattedName);
+
     // Clear local conversation history
     setConversationHistory([]);
 
     // Send a request to the server to clear the server-side conversation history
     try {
       await axios.post('http://localhost:3001/clear-conversation');
-      // After successfully clearing the conversation on the server, update the historical figure
-      const formattedName = formatName(figureName);
-      setHistoricalFigure(formattedName);
       // Fetch image URL and tagline for the new figure
       const response = await axios.post('http://localhost:3001/get-figure-details', { figureName: formattedName });
       console.log("figure_details:", response);
@@ -152,6 +153,17 @@ function App() {
       .replace(/\s+(-)\s+/g, '$1');
   }
 
+  const handleInteraction = (event) => {
+    event.preventDefault(); // Prevent the browser from handling the touch event as a click.
+    
+    // Logic to determine if this is a start or stop recording action
+    if (!isRecording) {
+      startRecording();
+    } else {
+      stopReadingAloud();
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -159,15 +171,15 @@ function App() {
         <div className="title-container">
           <h1 className="app-title">Have a Conversation with {formatName(historicalFigure)}</h1>
         </div>
+      </header>
         <div className="">
           <form onSubmit={updateHistoricalFigure}>
-            <button type="submit">Start New Conversation with</button>
-            <input type="text" name="figureName" placeholder="Enter Historical Figure Name" />
+            <button type="submit">Start New Conversation with:</button>
+            <input type="text" name="figureName" placeholder="Historical Figure Name" />
           </form>
         </div>
-      </header>
       <div className="element-wrapper">
-        <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
+        <button className="record-btn" onClick={handleInteraction} onTouchEnd={handleInteraction}>
           {isRecording ? `Stop Recording and Get Response From ${formatName(historicalFigure)}` : `Ask ${formatName(historicalFigure)} a Question`}
         </button>
       </div>
