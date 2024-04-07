@@ -43,9 +43,9 @@ function App() {
 
     // Send a request to the server to clear the server-side conversation history
     try {
-      await axios.post('http://localhost:3001/clear-conversation');
+      await axios.post('https://elder-comp-server-8e643edb1bd8.herokuapp.com/clear-conversation');
       // Fetch image URL and tagline for the new figure
-      const response = await axios.post('http://localhost:3001/get-figure-details', { figureName: formattedName });
+      const response = await axios.post('https://elder-comp-server-8e643edb1bd8.herokuapp.com/get-figure-details', { figureName: formattedName });
       console.log("figure_details:", response);
       setFigureDetails({ imageUrl: response.data.imageUrl, tagline: response.data.tagline });
     } catch (error) {
@@ -122,7 +122,7 @@ function App() {
       .replace(/([^.])$/, "$1."); // Ensure it ends with a period
 
     try {
-      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: correctedText, figure: historicalFigure });
+      const response = await axios.post('https://elder-comp-server-8e643edb1bd8.herokuapp.com/transcribe-text', { transcript: correctedText, figure: historicalFigure });
       // Update conversation history with both user's question and historicalFigure's response
       setConversationHistory(prevHistory => [
         ...prevHistory,
@@ -137,7 +137,7 @@ function App() {
   const clearConversation = async () => {
     try {
       // Send a request to the server to clear the conversation history
-      await axios.post('http://localhost:3001/clear-conversation');
+      await axios.post('https://elder-comp-server-8e643edb1bd8.herokuapp.com/clear-conversation');
       // Reset the local conversation history state
       setConversationHistory([]);
     } catch (error) {
