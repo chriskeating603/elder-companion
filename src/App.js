@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import rooseveltImage from './assets/images/fdr.png';
-import logoImage from './assets/images/logo.png'; // Add this line
+import logoImage from './assets/images/logo.png';
 
 function App() {
   const [isRecording, setIsRecording] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState([]); // Updated state
+  const [conversationHistory, setConversationHistory] = useState([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [conversationStarted, setConversationStarted] = useState(false);
-  const speechSynthesisUtterance = useRef(null);
+  const [historicalFigure, setHistoricalFigure] = useState('FDR');
+  const [figureDetails, setFigureDetails] = useState({ imageUrl: '', tagline: '' });
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -21,11 +22,37 @@ function App() {
   useEffect(() => {
     if (conversationHistory.length > 0) {
       const lastResponse = conversationHistory[conversationHistory.length - 1].content;
-      readFdrResponseAloud(lastResponse);
+      readHistoricalFigureResponseAloud(lastResponse);
     }
   }, [conversationHistory]);
 
-  const readFdrResponseAloud = (text) => {
+  useEffect(() => {
+    setHistoricalFigure('FDR');
+  }, []);
+
+  const updateHistoricalFigure = async (event) => {
+    event.preventDefault(); // Prevent the form from submitting in the traditional way
+    const figureName = event.target.figureName.value; // Assuming your input has a name attribute of 'figureName'
+    
+    // Clear local conversation history
+    setConversationHistory([]);
+
+    // Send a request to the server to clear the server-side conversation history
+    try {
+      await axios.post('http://localhost:3001/clear-conversation');
+      // After successfully clearing the conversation on the server, update the historical figure
+      const formattedName = formatName(figureName);
+      setHistoricalFigure(formattedName);
+      // Fetch image URL and tagline for the new figure
+      const response = await axios.post('http://localhost:3001/get-figure-details', { figureName: formattedName });
+      console.log("figure_details:", response);
+      setFigureDetails({ imageUrl: response.data.imageUrl, tagline: response.data.tagline });
+    } catch (error) {
+      console.error('Error clearing conversation on server:', error);
+    }
+  };
+
+  const readHistoricalFigureResponseAloud = (text) => {
     const synth = window.speechSynthesis;
     let voices = synth.getVoices();
 
@@ -94,12 +121,12 @@ function App() {
       .replace(/([^.])$/, "$1."); // Ensure it ends with a period
 
     try {
-      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: correctedText });
-      // Update conversation history with both user's question and FDR's response
+      const response = await axios.post('http://localhost:3001/transcribe-text', { transcript: correctedText, figure: historicalFigure });
+      // Update conversation history with both user's question and historicalFigure's response
       setConversationHistory(prevHistory => [
         ...prevHistory,
         { role: 'user', content: correctedText },
-        { role: 'fdr', content: response.data.response }
+        { role: 'historicalFigure', content: response.data.response }
       ]);
     } catch (error) {
       console.error('Error sending transcript to server:', error);
@@ -117,22 +144,31 @@ function App() {
     }
   };
 
+  function formatName(name) {
+    return name
+      .split(/\s+|-/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+      .replace(/\s+(-)\s+/g, '$1');
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logoImage} alt="Logo" className="app-logo"/>
         <div className="title-container">
-          <h1 className="app-title">Have a Conversation with FDR</h1>
+          <h1 className="app-title">Have a Conversation with {formatName(historicalFigure)}</h1>
         </div>
         <div className="">
-          <button className="header-btn" onClick={clearConversation}>
-            Start New Conversation
-          </button>
+          <form onSubmit={updateHistoricalFigure}>
+            <button type="submit">Start New Conversation with</button>
+            <input type="text" name="figureName" placeholder="Enter Historical Figure Name" />
+          </form>
         </div>
       </header>
       <div className="element-wrapper">
         <button className="record-btn" onClick={isRecording ? () => {} : startRecording}>
-          {isRecording ? 'Stop Recording and Get Response From FDR' : 'Ask FDR a Question'}
+          {isRecording ? `Stop Recording and Get Response From ${formatName(historicalFigure)}` : `Ask ${formatName(historicalFigure)} a Question`}
         </button>
       </div>
       <div className="conversation-history">
@@ -148,8 +184,8 @@ function App() {
         </button>
       )}
       <div className="element-wrapper">
-        <img src={rooseveltImage} alt="Franklin D. Roosevelt" className={`roosevelt-image ${isSpeaking ? 'speaking' : ''}`}/>
-        <p className="image-caption">Most beloved president of the Silent Generation, according to ChatGPT</p>
+        <img src={figureDetails.imageUrl || rooseveltImage} alt="Franklin D. Roosevelt" className={`roosevelt-image ${isSpeaking ? 'speaking' : ''}`}/>
+        <p className="image-caption">{figureDetails.tagline || "Most beloved president of the Silent Generation, according to ChatGPT"}</p>
       </div>
     </div>
   );
